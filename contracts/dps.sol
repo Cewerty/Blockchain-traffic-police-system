@@ -9,7 +9,7 @@ import './Proficoin.sol';
  * @notice Простой смарт-контаркт, который является автоматизированной системой управления ДПС
  * @dev Реализация простой АСУП для ДПС, которая реализует функционал регистрации транспортного средства, водительского удостоверения и аккантов водителей и сотрудников ДПС; а также выписывание или оплату штрафов 
  */
-contract Dps {
+contract TrafficPoliceSystem {
 
     /**
      * @dev Адрес etherium аккаунта на который будет поступать оплата штрафов от водителей 
@@ -130,7 +130,12 @@ contract Dps {
         return true;
     }
 
-    function sendFine(uint256 licenseNumber) public returns (bool success) {
+    function finesAmount(uint256 finesIndex) public view returns(uint256 amount) {
+        require(fines[msg.sender].length < finesIndex);
+        return (block.timestamp - fines[msg.sender][finesIndex]) <= 5 minutes ? 5 : 10;
+    }
+
+    function sendFine(uint256 licenseNumber) public onlyDpsWorkers() returns (bool success) {
         require(checkDriverNumber(licenseNumber));
         address driverAddress = licenseOwners[licenseNumber];
         drivers[driverAddress].unpaidFinesAmount++;
