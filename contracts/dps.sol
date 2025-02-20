@@ -47,9 +47,9 @@ contract TrafficPoliceSystem {
     }
 
     mapping(address => driver) public drivers;
-    mapping(address => uint256) public balances;
+    mapping(address => uint256) balances;
     mapping(address => driver) public dpsWorkers;
-    mapping (address => transport[]) public transports;
+    mapping(address => transport[]) public transports;
     mapping(address => uint256[]) public fines;
     mapping(uint256 => address) licenseOwners;
     driverLicense[] registratedLicences;
@@ -63,6 +63,10 @@ contract TrafficPoliceSystem {
         _;
     }
 
+    function balanceOf(address userAddress) public view returns (uint256 amount) {
+        return balances[userAddress];
+    } 
+    
     function setBalance(address userAddress, uint256 amount) public {
         balances[userAddress] = amount;
     }
