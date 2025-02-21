@@ -26,18 +26,29 @@ contract TrafficPoliceSystem {
         C
     }
 
+    /**
+     * @dev Пользовательский тип данных, представляющий собой транспортное средство
+     */
     struct transport {
         driverCategory category;
         uint256 marketPrice;
         uint256 explotasionDate;
     }
 
+
+    /**
+     * @dev Пользовательский тип данных, представляющий собой водительское удостоверение
+     */
     struct driverLicense {
         uint256 number;
         uint256 date;
         driverCategory category;
     }
 
+
+    /**
+     * @dev Пользовательский тип данных, представляющий водителя/сотрудника ДПС в зависимости от выбранной роли при регистрации
+     */
     struct driver {
         string fullName;
         driverLicense license;
@@ -46,18 +57,48 @@ contract TrafficPoliceSystem {
         bool registrated;
     }
 
+    /**
+     * @notice Все зарегистрированные водители привязанные к адресам
+     * @dev Значения в маппинг добавляются через функцию регистрации, при этом туда добавляются как сотрудники ДПС, так и обычные водители
+     */
     mapping(address => driver) public drivers;
+    /**
+     * @dev Mapping с балансами Proficoins, который используется при оплате штрафов и обновлении лицензии 
+     */
     mapping(address => uint256) balances;
+    /**
+     * @notice Все зарегистрированные водители ДПС
+     * @dev В отличии от маппинга drivers сюда добавляются только сотрудники ДПС, потому что только они должны иметь право выписывать штрафы
+     */
     mapping(address => driver) public dpsWorkers;
+    /**
+     * @notice Все зарегистрированные транспортные средства
+     * @dev Значения добавляются сюда через функцию registerTransport 
+     */
     mapping(address => transport[]) public transports;
+    /**
+     * @notice Все штрафы выписанные штрафы, привязанные к адресу Ethereum
+     * @dev Значения добавляются сюда, используя адреса, указанные в licenseOwners,
+     * потому что штрафы выписываются не по адресу, а по номеру водительского удостоверения
+     */
     mapping(address => uint256[]) public fines;
+    /**
+     * @dev Маппинг, который используется для связи номеров водительских удостоверений и адресов сети Ethereum для выписки штрафов
+     */
     mapping(uint256 => address) licenseOwners;
+    /**
+     * @dev Массив со всеми зарегестрированными в базе значениями 
+     */
     driverLicense[] registratedLicences;
 
     constructor() {
         bank = msg.sender;
     }
 
+    /**
+     * @notice Проверяет является ли пользователь сотрудником ДПС
+     * @dev Проверяет наличие адреса вызывающего контракта в мапе с адресами сотрудников ДПС
+     */
     modifier onlyDpsWorkers() {
         require(dpsWorkers[msg.sender].registrated == true);
         _;
@@ -146,5 +187,7 @@ contract TrafficPoliceSystem {
         fines[driverAddress].push(block.timestamp);
         return true;
     }
+
+    // TO-DO: Создать функцию для первичной регистрации пользователя в системе, как сотрудника ДПС, так и обычного водителя
 }
 
